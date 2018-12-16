@@ -122,6 +122,7 @@ describe Dispatcher do
         @source_queue.publish(quote_2, :headers =>{'target' => tgt2 })
         @source_queue.publish(quote_3, :headers =>{'target' => tgt1 })
         @source_queue.publish(quote_4, :headers =>{'target' => tgt2 })
+        # sleep(0.1) ## FIXES spec failure!
         chan.confirm_select
         chan.wait_for_confirms
 

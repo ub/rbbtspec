@@ -13,6 +13,8 @@ class Dispatcher
       puts "HEADERS: #{properties.headers.inspect}"
       target = @target_chan.queue(properties.headers['target'], durable: true)
       target.publish(body)
+      @target_chan.confirm_select
+      @target_chan.wait_for_confirms
       @channel.acknowledge(di.delivery_tag)
     end
     while queue.message_count > 0

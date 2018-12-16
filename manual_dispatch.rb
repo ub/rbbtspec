@@ -10,7 +10,6 @@ class Dispatcher
   def redispatch_all(source_queue_name)
     queue = @channel.queue(source_queue_name, durable:true)
     consumer = queue.subscribe(:manual_ack => true) do |di, properties, body|
-      puts "HEADERS: #{properties.headers.inspect}"
       target = @target_chan.queue(properties.headers['target'], durable: true)
       target.publish(body)
       @target_chan.confirm_select

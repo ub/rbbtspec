@@ -41,14 +41,10 @@ describe Dispatcher do
     context 'source with 1 compliant message (destination tgt1)' do
       let(:target_queue) {chan.queue(tgt1, durable:true)}
       before(:example) do
-        puts "CHANNEL ID= #{chan.id}"
         @source_queue = chan.queue(source_name, durable: true)
         @source_queue.publish(quote_1, :headers =>{'target' => tgt1 })
         chan.confirm_select
-        puts "STATUS:#{chan.status}"
         chan.wait_for_confirms
-        puts "STATUS:#{chan.status}, COUNT: #{@source_queue.message_count} UNCONFIRMED: #{chan.unconfirmed_set.size}"
-        puts "well"
 
       end
       after(:example) do
@@ -57,7 +53,6 @@ describe Dispatcher do
 
 
       it 'makes queue empty' do
-        puts @source_queue.message_count
         expect{
            subject.redispatch_all(source_name)
         }.to change { @source_queue.message_count }.from(1).to(0)
@@ -76,16 +71,18 @@ describe Dispatcher do
       before(:example) do
         @source_queue = chan.queue(source_name, durable: true)
         @source_queue.publish(quote_1, :headers =>{'target' => tgt1 })
-        @source_queue.publish(quote_2, :headers =>{'target' => tgt1 })
         chan.confirm_select
         chan.wait_for_confirms
+        @source_queue.publish(quote_2, :headers =>{'target' => tgt1 })
+        # chan.confirm_select
+        chan.wait_for_confirms
+          # puts "COUNT(expect 2):#{@source_queue.message_count}"
       end
       after(:example) do
         clean_queues
       end
 
       it 'makes queue empty' do
-        puts @source_queue.message_count
         expect{
            subject.redispatch_all(source_name)
         }.to change { @source_queue.message_count }.from(2).to(0)
@@ -97,16 +94,19 @@ describe Dispatcher do
       before(:example) do
         @source_queue = chan.queue(source_name, durable: true)
         @source_queue.publish(quote_1, :headers =>{'target' => tgt1 })
-        @source_queue.publish(quote_2, :headers =>{'target' => tgt2 })
         chan.confirm_select
         chan.wait_for_confirms
+        @source_queue.publish(quote_2, :headers =>{'target' => tgt2 })
+        # chan.confirm_select
+        chan.wait_for_confirms
+        # puts "COUNT(expect 2):#{@source_queue.message_count}"
+
       end
       after(:example) do
         clean_queues
       end
 
       it 'makes queue empty' do
-        puts @source_queue.message_count
         expect{
            subject.redispatch_all(source_name)
         }.to change { @source_queue.message_count }.from(2).to(0)
@@ -124,13 +124,14 @@ describe Dispatcher do
         @source_queue.publish(quote_4, :headers =>{'target' => tgt2 })
         chan.confirm_select
         chan.wait_for_confirms
+        # puts "COUNT(expect 4):#{@source_queue.message_count}"
+
       end
       after(:example) do
         clean_queues
       end
 
       it 'makes queue empty' do
-        puts @source_queue.message_count
         expect{
            subject.redispatch_all(source_name)
         }.to change { @source_queue.message_count }.from(4).to(0)

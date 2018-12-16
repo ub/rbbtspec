@@ -124,6 +124,7 @@ describe Dispatcher do
         @source_queue.publish(quote_4, :headers =>{'target' => tgt2 })
         chan.confirm_select
         chan.wait_for_confirms
+
         # puts "COUNT(expect 4):#{@source_queue.message_count}"
 
       end
@@ -132,6 +133,8 @@ describe Dispatcher do
       end
 
       it 'makes queue empty' do
+        # occasional failure:
+        # expected result to have initially been 4, but was 1
         expect{
            subject.redispatch_all(source_name)
         }.to change { @source_queue.message_count }.from(4).to(0)
